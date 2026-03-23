@@ -10,13 +10,14 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 fn main() -> Result<()> {
     let (grid, mut carts) = parse_input("input_josh.txt")?;
-    
+    let mut first_crash = false;
+    let num_carts = carts.len();
+    let mut remaining_carts = num_carts;
     loop {
         // step each cart
         // (& check collision)
-
         carts.sort_by_key(|cart| (cart.curr_pos.y, cart.curr_pos.x));
-        for i in 0..carts.len() {
+        for i in 0..num_carts {
             let cart = &mut carts[i];
             match cart.dirn {
                 Dirn::North => cart.curr_pos.y -= 1,
@@ -32,14 +33,32 @@ fn main() -> Result<()> {
                 _ => (),
             }
 
-            let cart = &carts[i];
-            for j in 0..carts.len() {
+            // let cart = &mut carts[i];
+            for j in 0..num_carts {
                 if j != i {
-                    let other = &carts[j];
-                    if cart.curr_pos == other.curr_pos {
-                        println!("{},{}", cart.curr_pos.x, cart.curr_pos.y);
-                        return Ok(());
+                    // let other = &mut carts[j];
+                    if carts[i].curr_pos == carts[j].curr_pos && !carts[i].crashed && !carts[j].crashed {
+                        if !first_crash {
+                            // println!("remaining carts: {remaining_carts}");
+                            println!("part 1: {},{}", carts[i].curr_pos.x, carts[i].curr_pos.y);
+                            first_crash = true;
+                        }
+                        carts[i].crashed = true;
+                        carts[j].crashed = true;
+                        remaining_carts -= 2;
                     }
+                }
+            }
+            // println!("remaining carts: {remaining_carts}");
+        }
+        if remaining_carts == 0 {
+            println!("???");
+        }
+        if remaining_carts == 1 {
+            for k in 0..num_carts {
+                if !carts[k].crashed {
+                    println!("part 2: found 1 remaining cart at {}", carts[k].curr_pos);
+                    return Ok(());
                 }
             }
         }
@@ -109,6 +128,7 @@ struct Cart {
     curr_pos: Point,
     dirn: Dirn,
     next_turn: Turn,
+    crashed: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]

@@ -18,6 +18,7 @@ pub fn parse_input(filename: &str) -> Result<(Vec<Vec<char>>, Vec<Cart>)> {
                     curr_pos: Point { x, y },
                     dirn: Dirn::from_char(c),
                     next_turn: Turn::Left,
+                    crashed: false,
                 };
 
                 cells[y][x] = match cart.dirn {
