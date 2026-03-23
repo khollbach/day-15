@@ -1,4 +1,6 @@
 use std::{error::Error};
+use std::fmt::{Display, Formatter};
+use std::fmt;
 
 use crate::input::parse_input;
 
@@ -7,7 +9,7 @@ mod input;
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 fn main() -> Result<()> {
-    let (grid, mut carts) = parse_input("input.txt")?;
+    let (grid, mut carts) = parse_input("input_josh.txt")?;
     
     loop {
         // step each cart
@@ -31,13 +33,22 @@ fn main() -> Result<()> {
             }
 
             let cart = &carts[i];
-            for other in &carts {
-                if cart.curr_pos == other.curr_pos {
-                    println!("{},{}", cart.curr_pos.x, cart.curr_pos.y);
-                    return Ok(());
+            for j in 0..carts.len() {
+                if j != i {
+                    let other = &carts[j];
+                    if cart.curr_pos == other.curr_pos {
+                        println!("{},{}", cart.curr_pos.x, cart.curr_pos.y);
+                        return Ok(());
+                    }
                 }
             }
         }
+    }
+}
+
+fn _print_carts(carts: &Vec<Cart>) {
+    for (i, cart) in carts.iter().enumerate() {
+        print!("cart number {i} at position {}\n", cart.curr_pos)
     }
 }
 
@@ -104,6 +115,13 @@ struct Cart {
 struct Point {
     x: usize,
     y: usize,
+}
+
+impl Display for Point {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{},{}", self.x, self.y)?;
+        return Ok(());
+    }
 }
 
 #[derive(Clone, Copy)]
